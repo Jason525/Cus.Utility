@@ -1,9 +1,0 @@
-D:\Projects\Jason's Projects\Utility\Utility\bin\Debug\EPPlus.xml
-D:\Projects\Jason's Projects\Utility\Utility\bin\Debug\itextsharp.xml
-D:\Projects\Jason's Projects\Utility\Utility\obj\Debug\Utility.csproj.AssemblyReference.cache
-D:\Projects\Jason's Projects\Utility\Utility\obj\Debug\Utility.csproj.CoreCompileInputs.cache
-D:\Projects\Jason's Projects\Utility\Utility\obj\Debug\Utility.csproj.CopyComplete
-D:\Projects\Jason's Projects\Utility\Utility\bin\Debug\Utility.dll
-D:\Projects\Jason's Projects\Utility\Utility\bin\Debug\Utility.pdb
-D:\Projects\Jason's Projects\Utility\Utility\obj\Debug\Utility.dll
-D:\Projects\Jason's Projects\Utility\Utility\obj\Debug\Utility.pdb
