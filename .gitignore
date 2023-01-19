@@ -1,2 +1,7 @@
 /obj
 /bin
+/Utility.sln.DotSettings.user
+/.vs
+/Utility/bin
+/Utility/obj
+/Utility/*.user

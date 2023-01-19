@@ -1,0 +1,105 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{80DBC577-4F86-47D4-9345-19FD540C4FAB}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Utility</RootNamespace>
+    <AssemblyName>Utility</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <DocumentationFile>
+    </DocumentationFile>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="EPPlus">
+      <HintPath>..\packages\Excel\EPPlus\EPPlus.dll</HintPath>
+    </Reference>
+    <Reference Include="ExcelLibrary">
+      <HintPath>..\packages\Excel\ExcelLibrary.dll</HintPath>
+    </Reference>
+    <Reference Include="itextsharp">
+      <HintPath>..\packages\iTextSharp.5.5.8\lib\itextsharp.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Data.Entity" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Web.Services" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Cache\MultipleFilesCache.cs" />
+    <Compile Include="DB\ADO.cs" />
+    <Compile Include="DB\DBConvert.cs" />
+    <Compile Include="DB\DBClient.cs" />
+    <Compile Include="DB\DBFactory.cs" />
+    <Compile Include="DB\DBQuery.cs" />
+    <Compile Include="DB\EF.cs" />
+    <Compile Include="DB\IDB.cs" />
+    <Compile Include="DB\MsSql.cs" />
+    <Compile Include="DB\TVP.cs" />
+    <Compile Include="DWS\DwsConfig.cs" />
+    <Compile Include="DWS\Helper.cs" />
+    <Compile Include="DWS\Services.cs" />
+    <Compile Include="Email\Mail.cs" />
+    <Compile Include="Email\SendingResult.cs" />
+    <Compile Include="Email\Smtp.cs" />
+    <Compile Include="Email\Utils.cs" />
+    <Compile Include="Cache\SingleFileCache.cs" />
+    <Compile Include="Excel\ExcelCell.cs" />
+    <Compile Include="Excel\ExcelColumn.cs" />
+    <Compile Include="Excel\ExcelBuilder.cs" />
+    <Compile Include="Excel\ExcelReader.cs" />
+    <Compile Include="PDF\PdfAttributes\PdfFieldAttribute.cs" />
+    <Compile Include="PDF\PdfHelper.cs" />
+    <Compile Include="SimpleExcel\Attributes\ExcelDateValue.cs" />
+    <Compile Include="SimpleExcel\Attributes\ExcelInfoAttribute.cs" />
+    <Compile Include="SimpleExcel\ExcelUtility.cs" />
+    <Compile Include="Excel\Formatter.cs" />
+    <Compile Include="Excel\ExcelRow.cs" />
+    <Compile Include="Excel\IValueFormat.cs" />
+    <Compile Include="Excel\CellStyle.cs" />
+    <Compile Include="Excel\SheetConfig.cs" />
+    <Compile Include="ObjectExtension.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SafeConversion.cs" />
+    <Compile Include="StringExtension.cs" />
+    <Compile Include="Xml\Deserializer.cs" />
+    <Compile Include="Xml\Serializer.cs" />
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
