@@ -46,41 +46,9 @@ namespace Utility
             return Thread.CurrentThread.CurrentCulture.TextInfo.ToTitleCase(value);
         }
 
-        /// <summary>
-        /// start with "$" or "-$", end with "%", includes ","
-        /// </summary>
-        /// <param name="txt"></param>
-        /// <param name="defaultValue"></param>
-        /// <returns></returns>
-        public static double ToDoubleWithSpechars(this string txt, double defaultValue = 0)
-        {
-            var d = defaultValue;
-
-            if (!string.IsNullOrEmpty(txt))
-            {
-                txt = txt.Trim();
-
-                if (!double.TryParse(txt, out d))
-                {
-                    if (!txt.StartsWith(",") && !txt.EndsWith(",")) txt = txt.Replace(",", "");
-                    if (txt.StartsWith("-$")) txt = txt.Replace("$", "");
-                    if (txt.StartsWith("($")) txt = txt.Replace("($", "-").Replace(")", "");
-                    if (txt.StartsWith("$")) txt = txt.Substring(1);
-                    if (txt.EndsWith("%")) txt = txt.Remove(txt.Length - 1);
-
-                    if (double.TryParse(txt, out d))
-                    {
-                        return d;
-                    }
-                }
-            }
-
-            return d;
-        }
-
         public static string ToUsDollar(this string txt)
         {
-            return txt.ToDoubleWithSpechars().ToString("c", new CultureInfo("en-US"));
+            return txt.ToAllDouble().ToString("c", new CultureInfo("en-US"));
         }
 
         /// <summary>
@@ -140,6 +108,11 @@ namespace Utility
             }
 
             return d;
+        }
+
+        public static decimal ToAllDecimal(this string txt, decimal defaultValue = 0)
+        {
+            return txt.ToAllDouble().ToSafeValue().ToDecimal();
         }
         #endregion
     }
