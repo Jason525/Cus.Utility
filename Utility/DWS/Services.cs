@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Reflection;
 
 namespace Utility.DWS
@@ -14,26 +16,26 @@ namespace Utility.DWS
         {
             Request = request;
 
-            using (var stream = Request.GetWSDL())
+            using (Stream stream = Request.GetWSDL())
             {
                 CurrentAssembly = Helper.GetAssembly(Request.Namespace, stream);
             }
-                
+
             CurrentClass = CreateClass(Request.ClassName);
             CurrentObj = Activator.CreateInstance(CurrentClass);
 
-            foreach (var rev in Request.Revises)
+            foreach (KeyValuePair<string, object> rev in Request.Revises)
             {
-                var pTimeout = CurrentClass.GetProperty(rev.Key);
+                PropertyInfo pTimeout = CurrentClass.GetProperty(rev.Key);
                 if (pTimeout != null) pTimeout.SetValue(CurrentObj, rev.Value, null);
             }
         }
 
         public object Invoke(string methodName, params object[] args)
         {
-            var m = CurrentClass.GetMethod(methodName);
+            MethodInfo m = CurrentClass.GetMethod(methodName);
 
-            return m.Invoke(CurrentObj, args);
+            return m?.Invoke(CurrentObj, args);
         }
 
         public Type CreateClass(string className)

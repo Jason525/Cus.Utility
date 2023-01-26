@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace Utility.Excel
+﻿namespace Utility.Excel
 {
     public class ExcelColumn
     {
@@ -24,7 +19,7 @@ namespace Utility.Excel
         public ExcelColumn(string fieldName, IValueFormat formatter = null)
         {
             HeadSettings = new ExcelCell(fieldName);
-            CellSettings = new ExcelCell(fieldName, formatter);  
+            CellSettings = new ExcelCell(fieldName, formatter);
         }
 
         public ExcelColumn(string fieldName, string headText, IValueFormat formatter = null)

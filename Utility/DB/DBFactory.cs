@@ -1,20 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-using System.Data.Objects;
+﻿using System.Data.Objects;
 
 namespace Utility.DB
 {
     public static class DBFactory
     {
-        public static ADO CreateMSADO(string conn) 
+        public static ADO CreateMSADO(string conn)
         {
             return new ADO(conn, new MsSql());
         }
 
-        public static EF<T> CreateMSEF<T>() where T : ObjectContext,  new()
+        public static EF<T> CreateMSEF<T>() where T : ObjectContext, new()
         {
             return new EF<T>(new MsSql());
         }

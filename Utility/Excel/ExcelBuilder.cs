@@ -1,7 +1,7 @@
-﻿using System.IO;
-using System.Linq;
+﻿using OfficeOpenXml;
 using System.Collections.Generic;
-using OfficeOpenXml;
+using System.IO;
+using System.Linq;
 
 namespace Utility.Excel
 {
@@ -13,24 +13,24 @@ namespace Utility.Excel
             CreateNew(filePath, new SheetConfig { Columns = columns, Items = items });
         }
 
-        public static void CreateNew(string filePath, params SheetConfig[] sheets) 
+        public static void CreateNew(string filePath, params SheetConfig[] sheets)
         {
-            using (var xlPackage = Create(sheets))
+            using (ExcelPackage xlPackage = Create(sheets))
             {
-                var dir = Path.GetDirectoryName(filePath);
+                string dir = Path.GetDirectoryName(filePath);
                 if (!Directory.Exists(dir)) Directory.CreateDirectory(dir);
 
                 xlPackage.SaveAs(new FileInfo(filePath));
             }
         }
 
-        public static ExcelPackage Create(params SheetConfig[] sheets) 
+        public static ExcelPackage Create(params SheetConfig[] sheets)
         {
-            var xlPackage = new ExcelPackage();
+            ExcelPackage xlPackage = new ExcelPackage();
 
-            foreach (var sheet in sheets)
+            foreach (SheetConfig sheet in sheets)
             {
-                var worksheet = xlPackage.Workbook.Worksheets.Add(sheet.Name);
+                ExcelWorksheet worksheet = xlPackage.Workbook.Worksheets.Add(sheet.Name);
 
                 FillHead(worksheet, sheet.Columns.Select(c => c.HeadSettings));
                 FillItems(worksheet, 2, sheet.Columns.Select(c => c.CellSettings), sheet.Items);
@@ -53,9 +53,9 @@ namespace Utility.Excel
 
         private static void FillItems(ExcelWorksheet sheet, int startRowIndex, IEnumerable<ExcelCell> cellSettings, List<IExcelRow> items)
         {
-            var rowIndex = startRowIndex;
+            int rowIndex = startRowIndex;
 
-            items.ForEach(item => 
+            items.ForEach(item =>
             {
                 FillRow(sheet, rowIndex, cellSettings, item);
                 rowIndex += 1;
@@ -64,9 +64,9 @@ namespace Utility.Excel
 
         private static void FillRow(ExcelWorksheet sheet, int rowIndex, IEnumerable<ExcelCell> cellSettings, IExcelRow item = null)
         {
-            var colIndex = 1;
+            int colIndex = 1;
 
-            foreach (var setting in cellSettings)
+            foreach (ExcelCell setting in cellSettings)
             {
                 FillCell(sheet.Cells[rowIndex, colIndex], setting, item);
                 colIndex += 1;

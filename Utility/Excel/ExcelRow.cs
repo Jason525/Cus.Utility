@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Collections.Generic;
 
 namespace Utility.Excel
 {
@@ -9,33 +6,25 @@ namespace Utility.Excel
 
     public abstract class ExcelRow : IExcelRow
     {
-        private List<ExcelCell> _SpecificColumns;
+        private List<ExcelCell> _specificColumns;
 
         public virtual List<ExcelCell> SpecificColumns
         {
-            get
-            {
-                if (_SpecificColumns == null) _SpecificColumns = new List<ExcelCell>();
-
-                return _SpecificColumns;
-            }
-            set
-            {
-                _SpecificColumns = value;
-            }
+            get => _specificColumns ?? (_specificColumns = new List<ExcelCell>());
+            set => _specificColumns = value;
         }
 
         public IValueFormat this[string fieldName]
         {
             get
             {
-                var col = SpecificColumns.Find(c => c.FieldName == fieldName);
+                ExcelCell col = SpecificColumns.Find(c => c.FieldName == fieldName);
 
-                return col == null ? col.Formatter : null;
+                return col?.Formatter;
             }
             set
             {
-                var col = SpecificColumns.Find(c => c.FieldName == fieldName);
+                ExcelCell col = SpecificColumns.Find(c => c.FieldName == fieldName);
 
                 if (col != null)
                 {
@@ -45,7 +34,7 @@ namespace Utility.Excel
                 {
                     SpecificColumns.Add(new ExcelCell(fieldName, value));
                 }
-                
+
             }
         }
 

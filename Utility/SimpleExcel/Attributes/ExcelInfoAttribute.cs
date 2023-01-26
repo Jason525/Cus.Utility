@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Text;
 
 namespace Utility.SimpleExcel.Attributes
 {
@@ -24,19 +23,19 @@ namespace Utility.SimpleExcel.Attributes
 
         public List<string> GetDynamicHeaders(IEnumerable<object> models)
         {
-            if(!models.Any())
+            if (!models.Any())
             {
                 return new List<string>();
             }
             object model = models.First();
             Type t = model.GetType();
             MethodInfo m = t.GetMethod(HeaderNameFuncName);
-            IEnumerable<string> ret = m.Invoke(model, new object[] { models }) as IEnumerable<string>;
-            return ret.ToList();
+            IEnumerable<string> ret = m?.Invoke(model, new object[] { models }) as IEnumerable<string>;
+            return ret?.ToList();
         }
     }
 
-    public class ExcelInfoAttribute:Attribute
+    public class ExcelInfoAttribute : Attribute
     {
         public string HeaderName { get; set; }
 
@@ -44,7 +43,7 @@ namespace Utility.SimpleExcel.Attributes
 
         Func<object, bool> IsColVisible { get; set; }
 
-        public ExcelInfoAttribute(string headerName, string cellFormat, Func<object, bool> isColVisibleFunc=null)
+        public ExcelInfoAttribute(string headerName, string cellFormat, Func<object, bool> isColVisibleFunc = null)
         {
             HeaderName = headerName;
             CellFormat = cellFormat;

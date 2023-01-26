@@ -1,8 +1,5 @@
 ﻿using iTextSharp.text;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace Utility.PDF.PdfAttributes
 {
@@ -33,7 +30,7 @@ namespace Utility.PDF.PdfAttributes
             switch (color)
             {
                 case RED:
-                    FontColor = BaseColor.RED;break;
+                    FontColor = BaseColor.RED; break;
                 case GREEN:
                     FontColor = BaseColor.GREEN; break;
                 case BLACK:

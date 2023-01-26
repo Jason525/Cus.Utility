@@ -1,14 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
+using System.Data.Objects;
 using System.Linq;
 using System.Text;
 
-using System.Data;
-using System.Data.Objects;
-
 namespace Utility.DB
 {
-    public class EF<DB> : DBClient where DB : ObjectContext,  new()
+    public class EF<DB> : DBClient where DB : ObjectContext, new()
     {
         #region Creator
         public EF(IDB client, int timeout = 180) : base(client, timeout)
@@ -27,9 +26,9 @@ namespace Utility.DB
         #region Query
         public override List<T> Query<T>(DBQuery query)
         {
-            var list = new List<T>();
+            List<T> list = new List<T>();
 
-            Execute(query, db => 
+            Execute(query, db =>
             {
                 list = Query<T>(db, query);
             });
@@ -39,9 +38,9 @@ namespace Utility.DB
 
         protected List<T> Query<T>(ObjectContext db, DBQuery query)
         {
-            var sParas = ToParameters(query.Inputs).ToList();
-            var outputs = query.Outputs(Database);
-            var result = new List<T>();
+            List<IDbDataParameter> sParas = ToParameters(query.Inputs).ToList();
+            List<IDbDataParameter> outputs = query.Outputs(Database).ToList();
+            List<T> result;
 
             if (query.IsSql)
             {
@@ -50,14 +49,14 @@ namespace Utility.DB
             }
             else
             {
-                var sql = new StringBuilder();
+                StringBuilder sql = new StringBuilder();
 
                 sql.AppendFormat(" EXEC [dbo].[{0}] ", query.CommandText);
                 sParas.ToList().ForEach(p => sql.AppendFormat(" {0}={0},", p.ParameterName));
 
                 if (outputs.Any())
                 {
-                    outputs.ToList().ForEach(op =>
+                    outputs.ForEach(op =>
                     {
                         sParas.Add(op);
                         sql.AppendFormat(" {0}={0} OUTPUT, ", op.ParameterName);
@@ -74,7 +73,7 @@ namespace Utility.DB
 
         public override List<string> QueryStringList(DBQuery query)
         {
-            var list = new List<string>();
+            List<string> list = new List<string>();
 
             Execute(query, db =>
             {
@@ -86,7 +85,7 @@ namespace Utility.DB
 
         public override List<T> QuerySingleColumn<T>(DBQuery query)
         {
-            var list = new List<T>();
+            List<T> list = new List<T>();
 
             Execute(query, db =>
             {
@@ -100,7 +99,7 @@ namespace Utility.DB
         #region Sacle
         public override T Sacle<T>(DBQuery query)
         {
-            var result = default(T);
+            T result = default(T);
 
             Execute(query, db =>
             {
@@ -116,7 +115,7 @@ namespace Utility.DB
 
             Execute(query, db =>
             {
-                result = (object)Query<string>(db, query).FirstOrDefault();
+                result = Query<string>(db, query).FirstOrDefault();
             });
 
             return result;
@@ -126,12 +125,12 @@ namespace Utility.DB
         #region NonQuery
         public override int NonQuery(DBQuery query)
         {
-            var rows = 0;
+            int rows = 0;
 
-            Execute(query, db => 
+            Execute(query, db =>
             {
-                var paras = new List<IDbDataParameter>();
-                var outputs = query.Outputs(Database);
+                List<IDbDataParameter> paras = new List<IDbDataParameter>();
+                List<IDbDataParameter> outputs = query.Outputs(Database).ToList();
 
                 if (query.Inputs != null) paras.AddRange(ToParameters(query.Inputs));
 
@@ -148,9 +147,9 @@ namespace Utility.DB
         #region Execute
         public void Execute(DBQuery query, Action<DB> invoke)
         {
-            var timeout = (query != null && query.Timeout.HasValue) ? query.Timeout.Value : this.CommandTimeout;
+            int timeout = query != null && query.Timeout.HasValue ? query.Timeout.Value : CommandTimeout;
 
-            using (var db = new DB())
+            using (DB db = new DB())
             {
                 db.CommandTimeout = timeout;
                 invoke(db);

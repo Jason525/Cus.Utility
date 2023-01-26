@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Net;
 using System.Net.Mail;
 
 namespace Utility.Email
@@ -22,14 +18,14 @@ namespace Utility.Email
         {
             get
             {
-                var msg = "";
+                string msg = "";
 
                 if (!IsSent)
                 {
                     msg = TryAgain != null ? TryAgain.Error.Message : First.Error.Message;
                 }
 
-                return msg; 
+                return msg;
             }
         }
 

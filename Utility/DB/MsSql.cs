@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-using System.Data;
+﻿using System.Data;
 using System.Data.SqlClient;
 
 namespace Utility.DB
@@ -14,10 +9,12 @@ namespace Utility.DB
         {
             if (value is TVP)
             {
-                var tvp = value as TVP;
-                var tvpParam = new SqlParameter(string.Concat("@", name), SqlDbType.Structured);
-                tvpParam.TypeName = tvp.TypeName;
-                tvpParam.Value = tvp.Value;
+                TVP tvp = value as TVP;
+                SqlParameter tvpParam = new SqlParameter(string.Concat("@", name), SqlDbType.Structured)
+                {
+                    TypeName = tvp.TypeName, 
+                    Value = tvp.Value
+                };
 
                 return tvpParam;
             }
@@ -27,7 +24,7 @@ namespace Utility.DB
 
         public IDbConnection GetConnection(string conn)
         {
-            return new SqlConnection(conn); 
+            return new SqlConnection(conn);
         }
 
         public IDbCommand GetCommand(IDbConnection conn, CommandType commandType, string commandText, int commandTimeout)

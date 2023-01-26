@@ -1,12 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using ExcelLibrary.SpreadSheet;
 using OfficeOpenXml;
+using System.Collections.Generic;
 using System.Data;
 using System.Data.OleDb;
 using System.IO;
-using ExcelLibrary.SpreadSheet;
 
 namespace Utility.Excel
 {
@@ -28,7 +25,7 @@ namespace Utility.Excel
 
             ExcelPackage pck = new ExcelPackage();
 
-            foreach(DataTable dt in ds.Tables)
+            foreach (DataTable dt in ds.Tables)
             {
                 ExcelWorksheet ws = pck.Workbook.Worksheets.Add(dt.TableName);
                 ws.Cells["A1"].LoadFromDataTable(dt, true);
@@ -39,7 +36,7 @@ namespace Utility.Excel
 
         private static DataSet GetExcelToDataSet(string filePath)
         {
-            var connStr = string.Empty;
+            string connStr = string.Empty;
             if (Path.GetExtension(filePath) == ".xls")
             {
                 connStr = @"Provider=Microsoft.Jet.OLEDB.4.0;Data Source=" + filePath + ";Extended Properties=\"Excel 8.0;HDR=Yes;IMEX=2\"";
@@ -56,8 +53,8 @@ namespace Utility.Excel
 
             List<string> sheetNames = GetSheetNames(filePath);
 
-            var ds = new DataSet();
-            var conn = new OleDbConnection(connStr);
+            DataSet ds = new DataSet();
+            OleDbConnection conn = new OleDbConnection(connStr);
             try
             {
                 conn.Open();
@@ -93,11 +90,11 @@ namespace Utility.Excel
         private static List<string> GetSheetNames(string filePath)
         {
             List<string> sheetNames = new List<string>();
-            using(FileStream fileStream = new FileStream(filePath, FileMode.Open))
+            using (FileStream fileStream = new FileStream(filePath, FileMode.Open))
             {
                 Workbook workbook = Workbook.Load(fileStream);
 
-                foreach(Worksheet sheet in workbook.Worksheets)
+                foreach (Worksheet sheet in workbook.Worksheets)
                 {
                     sheetNames.Add(sheet.Name);
                 }

@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Reflection;
-
-using System.Data;
 
 namespace Utility.DB
 {
@@ -23,32 +22,24 @@ namespace Utility.DB
         #region Advanced Query
         public override T Advanced<T>(T query)
         {
-            var sets = query.Datasets();
+            List<PropertyInfo> sets = query.Datasets();
 
             ExecuteReader(query, reader =>
             {
-                var index = 0;
+                int index = 0;
 
                 do
                 {
-                    var p = sets[index];
-                    var itemType = p.PropertyType.GetGenericArguments()[0];
-                    var listType = typeof(List<>).MakeGenericType(itemType);
-                    var list = Activator.CreateInstance(listType);
-                    var addMethod = listType.GetMethod("Add");
+                    PropertyInfo p = sets[index];
+                    Type itemType = p.PropertyType.GetGenericArguments()[0];
+                    Type listType = typeof(List<>).MakeGenericType(itemType);
+                    object list = Activator.CreateInstance(listType);
+                    MethodInfo addMethod = listType.GetMethod("Add");
 
                     while (reader.Read())
                     {
-                        object item;
-                        if (itemType.GetConstructors().Any(c => c.GetParameters().Count() == 0))
-                        {
-                            item = DBConvert.ToModel(reader, itemType);
-                        }
-                        else
-                        {
-                            item = reader.GetValue(0);
-                        }
-                        addMethod.Invoke(list, new object[] { item });
+                        object item = itemType.GetConstructors().Any(c => !c.GetParameters().Any()) ? DBConvert.ToModel(reader, itemType) : reader.GetValue(0);
+                        if (addMethod != null) addMethod.Invoke(list, new[] { item });
                     }
 
                     p.SetValue(query, list, null);
@@ -57,16 +48,16 @@ namespace Utility.DB
                 while (reader.NextResult() && index < sets.Count);
             });
 
-            return query as T;
+            return query;
         }
         #endregion 
 
         #region Query List
         public override List<T> Query<T>(DBQuery query)
         {
-            var list = new List<T>();
+            List<T> list = new List<T>();
 
-            ExecuteReader(query, reader => 
+            ExecuteReader(query, reader =>
             {
                 while (reader.Read())
                 {
@@ -79,7 +70,7 @@ namespace Utility.DB
 
         public override List<string> QueryStringList(DBQuery query)
         {
-            var list = new List<string>();
+            List<string> list = new List<string>();
 
             ExecuteReader(query, reader =>
             {
@@ -92,12 +83,12 @@ namespace Utility.DB
             return list;
         }
 
-        public override List<T> QuerySingleColumn<T>(DBQuery query)  
+        public override List<T> QuerySingleColumn<T>(DBQuery query)
         {
-            Func<IDataReader, T> strConvert = (reader) => { return (T)reader[0];  };
+            Func<IDataReader, T> strConvert = (reader) => { return (T)reader[0]; };
             Func<IDataReader, T> valConvert = (reader) => { return (T)SafeConversion.To(typeof(T), reader[0]); };
-            var convert = typeof(T) == typeof(string) ? strConvert : valConvert;
-            var list = new List<T>();
+            Func<IDataReader, T> convert = typeof(T) == typeof(string) ? strConvert : valConvert;
+            List<T> list = new List<T>();
 
             ExecuteReader(query, reader =>
             {
@@ -112,12 +103,12 @@ namespace Utility.DB
         #endregion
 
         #region Sacle
-        public override T Sacle<T>(DBQuery query)  
+        public override T Sacle<T>(DBQuery query)
         {
             Func<object, T> strConvert = (obj) => { return (T)obj; };
             Func<object, T> valConvert = (obj) => { return (T)SafeConversion.To(typeof(T), obj); };
-            var convert = typeof(T) == typeof(string) ? strConvert : valConvert;
-            var native = Sacle(query);
+            Func<object, T> convert = typeof(T) == typeof(string) ? strConvert : valConvert;
+            object native = Sacle(query);
 
             return convert(native);
         }
@@ -142,7 +133,7 @@ namespace Utility.DB
         #region NonQuery
         public override int NonQuery(DBQuery query)
         {
-            var rows = 0;
+            int rows = 0;
 
             Execute(query, cmd =>
             {
@@ -155,12 +146,12 @@ namespace Utility.DB
         #endregion 
 
         #region Execute SQL
-        public void ExecuteSQL(string sql, Action<IDataReader> invoke, object parameters = null)
+        public void ExecuteSql(string sql, Action<IDataReader> invoke, object parameters = null)
         {
             ExecuteReader(new DBQuery { CommandText = sql, IsSql = true, Inputs = parameters }, invoke);
         }
 
-        public List<T> ExecuteSQL<T>(string sql, object parameters = null) where T : class, new()
+        public List<T> ExecuteSql<T>(string sql, object parameters = null) where T : class, new()
         {
             return Query<T>(sql, true, parameters);
         }
@@ -169,13 +160,13 @@ namespace Utility.DB
         #region Query DataSet, DataTable  
         public virtual DataSet QueryDataSet(DBQuery query)
         {
-            var ds = new DataSet();
+            DataSet ds = new DataSet();
 
             ExecuteReader(query, (reader) =>
             {
                 while (!reader.IsClosed)
                 {
-                    var dt = new DataTable();
+                    DataTable dt = new DataTable();
                     dt.Load(reader);
                     ds.Tables.Add(dt);
                 }
@@ -191,7 +182,7 @@ namespace Utility.DB
 
         public virtual DataTable QueryDataTable(DBQuery query)
         {
-            var dt = new DataTable();
+            DataTable dt = new DataTable();
 
             ExecuteReader(query, (reader) =>
             {
@@ -215,7 +206,7 @@ namespace Utility.DB
         {
             Execute(query, cmd =>
             {
-                using (var reader = cmd.ExecuteReader())
+                using (IDataReader reader = cmd.ExecuteReader())
                 {
                     invoke(reader);
                 }
@@ -226,15 +217,15 @@ namespace Utility.DB
 
         public void Execute(DBQuery query, Action<IDbCommand> invoke)
         {
-            var timeout = query.Timeout.HasValue ? query.Timeout.Value : this.CommandTimeout;
+            int timeout = query.Timeout ?? CommandTimeout;
 
-            using (var conn = Database.GetConnection(ConnString))
+            using (IDbConnection conn = Database.GetConnection(ConnString))
             {
-                var command = Database.GetCommand(conn, query.IsSql ? CommandType.Text : CommandType.StoredProcedure, query.CommandText, timeout);
-                var outputs = query.Outputs(Database);
+                IDbCommand command = Database.GetCommand(conn, query.IsSql ? CommandType.Text : CommandType.StoredProcedure, query.CommandText, timeout);
+                List<IDbDataParameter> outputs = query.Outputs(Database).ToList();
 
                 if (query.Inputs != null) ToParameters(query.Inputs).ToList().ForEach(p => command.Parameters.Add(p));
-                if (outputs.Any()) outputs.ToList().ForEach(p => command.Parameters.Add(p));
+                if (outputs.Any()) outputs.ForEach(p => command.Parameters.Add(p));
 
                 conn.Open();
                 invoke(command);

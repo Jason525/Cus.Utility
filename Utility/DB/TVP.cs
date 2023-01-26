@@ -1,17 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Data;
+using System.Linq;
 using System.Reflection;
-
-using Utility;
 
 namespace Utility.DB
 {
     #region Attrubues
     public class TvpItemAttribute : Attribute
     {
-        
+
     }
 
     public class TvpFieldAttribute : Attribute
@@ -30,7 +28,7 @@ namespace Utility.DB
 
         internal object GetValue(object instance)
         {
-            var value = Field.GetValue(instance, null);
+            object value = Field.GetValue(instance, null);
 
             if (Handler != null && Handler.Handle != null)
             {
@@ -47,7 +45,7 @@ namespace Utility.DB
 
         internal object LimitString(object value)
         {
-            var str = value.ToSafeValue();
+            string str = value.ToSafeValue();
 
             if (str.Length > MaxLength)
             {
@@ -70,7 +68,7 @@ namespace Utility.DB
             Fields = fields.ToList();
         }
 
-        public TVPSpecialHandler SetHandle<T>(Func<T, T> handle) 
+        public TVPSpecialHandler SetHandle<T>(Func<T, T> handle)
         {
             Handle = (o) => { return handle((T)o); };
             return this;
@@ -112,14 +110,14 @@ namespace Utility.DB
 
         protected DataTable ToDataTable<T>(List<T> items, ITVPSpecialHandling handling) where T : class, new()
         {
-            var dt = new DataTable();
+            DataTable dt = new DataTable();
 
             if (items.Any())
             {
-                var type = items[0].GetType();
-                var fields = type.GetProperties().ToList();
-                var isSpecial = type.GetCustomAttributes(typeof(TvpItemAttribute), true).Any();
-                var attributes = GetTvpFieldAttrubues(fields, isSpecial).ToList();
+                Type type = items[0].GetType();
+                List<PropertyInfo> fields = type.GetProperties().ToList();
+                bool isSpecial = type.GetCustomAttributes(typeof(TvpItemAttribute), true).Any();
+                List<TvpFieldAttribute> attributes = GetTvpFieldAttrubues(fields, isSpecial).ToList();
 
                 if (handling != null)
                 {
@@ -136,7 +134,7 @@ namespace Utility.DB
 
                 items.ForEach(item =>
                 {
-                    var row = dt.NewRow();
+                    DataRow row = dt.NewRow();
 
                     attributes.ForEach(attr =>
                     {
@@ -161,11 +159,11 @@ namespace Utility.DB
 
             //if class is TvpItemAttribute, all properties are valid no matter whether it is TvpFieldAttribute
             //if class is not TvpItemAttribute, only use the properties with TvpFieldAttribute.  
-            if (!isSpecial) list = list.Where(p => p.attr != null); 
+            if (!isSpecial) list = list.Where(p => p.attr != null);
 
             return list.Select(i =>
             {
-                var attr = i.attr ?? new TvpFieldAttribute();
+                TvpFieldAttribute attr = i.attr ?? new TvpFieldAttribute();
                 attr.Field = i.field;
                 if (attr.ColumnName.IsEmpty()) attr.ColumnName = i.field.Name;
                 return attr;

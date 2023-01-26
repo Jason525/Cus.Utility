@@ -1,11 +1,11 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Net;
 using System.Net.Mail;
 using System.Net.Security;
 using System.Security.Cryptography.X509Certificates;
+using System.Text;
 
 namespace Utility.Email
 {
@@ -26,7 +26,7 @@ namespace Utility.Email
             mailMsg.From = new MailAddress(mailFrom);
 
             // Assign the "to" address(es).
-            String[] tos = mailTo.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+            string[] tos = mailTo.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
             foreach (string addr in tos.Where(SafeConversion.IsEmail))
             {
                 mailMsg.To.Add(new MailAddress(addr));
@@ -35,7 +35,7 @@ namespace Utility.Email
             // Assign the "cc" address(es).
             if (!string.IsNullOrEmpty(mailCC))
             {
-                String[] ccs = mailCC.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+                string[] ccs = mailCC.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
                 foreach (string addr in ccs.Where(SafeConversion.IsEmail))
                 {
                     mailMsg.CC.Add(new MailAddress(addr));
@@ -45,8 +45,7 @@ namespace Utility.Email
             // Assign the "bcc" address(es).
             if (!string.IsNullOrEmpty(mailBCC))
             {
-                String[] bccs = null;
-                bccs = mailBCC.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+                string[] bccs = mailBCC.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
                 foreach (string addr in bccs.Where(SafeConversion.IsEmail))
                 {
                     mailMsg.Bcc.Add(new MailAddress(addr));
@@ -56,7 +55,8 @@ namespace Utility.Email
             // Assign the reply-to address.
             if (mailReplyTo != null)
             {
-                mailReplyTo.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries).ToList().ForEach(addr => {
+                mailReplyTo.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries).ToList().ForEach(addr =>
+                {
                     mailMsg.ReplyToList.Add(new MailAddress(addr));
                 });
             }
@@ -88,9 +88,8 @@ namespace Utility.Email
             // Attach files.
             if (attachFiles != null)
             {
-                String[] files = null;
-                files = attachFiles.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
-                foreach (String filename in files)
+                string[] files = attachFiles.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+                foreach (string filename in files)
                 {
                     // Create the file attachment for this e-mail message.
                     Attachment data = new Attachment(filename, System.Net.Mime.MediaTypeNames.Application.Octet);
@@ -125,8 +124,8 @@ namespace Utility.Email
         {
             ServicePointManager.ServerCertificateValidationCallback = ValidateServerCertificate;
 
-            var results = new SendingResult();
-            var client = new SmtpClient(server.RelayServer, server.RelayPort)
+            SendingResult results = new SendingResult();
+            SmtpClient client = new SmtpClient(server.RelayServer, server.RelayPort)
             {
                 EnableSsl = server.UseSSL,
                 Credentials = new NetworkCredential(server.UserName ?? "", server.Password ?? "")
@@ -142,7 +141,7 @@ namespace Utility.Email
             {
                 results.First.EndSend(ex);
 
-                if (ex.Message.ToLower().IndexOf("operation has timed out") >= 0)
+                if (ex.Message.ToLower().IndexOf("operation has timed out", StringComparison.Ordinal) >= 0)
                 {
                     try
                     {
@@ -168,13 +167,13 @@ namespace Utility.Email
         {
             ServicePointManager.ServerCertificateValidationCallback = ValidateServerCertificate;
 
-            var results = new SendingResult();
-            var client = new SmtpClient();
+            SendingResult results = new SendingResult();
+            SmtpClient client = new SmtpClient();
 
             try
             {
                 results.First = new SingleResult().BeginSend();
-				mail.BodyEncoding = System.Text.Encoding.UTF8;
+                mail.BodyEncoding = Encoding.UTF8;
                 client.Send(mail);
                 results.First.EndSend();
             }
@@ -182,7 +181,7 @@ namespace Utility.Email
             {
                 results.First.EndSend(ex);
 
-                if (ex.Message.ToLower().IndexOf("operation has timed out") >= 0)
+                if (ex.Message.ToLower().IndexOf("operation has timed out", StringComparison.Ordinal) >= 0)
                 {
                     try
                     {

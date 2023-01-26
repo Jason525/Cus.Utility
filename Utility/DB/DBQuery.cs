@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
 using System.Data;
+using System.Linq;
 using System.Reflection;
 
 namespace Utility.DB
@@ -38,19 +36,19 @@ namespace Utility.DB
 
         public List<PropertyInfo> Datasets()
         {
-            return this.GetType().GetProperties()
+            return GetType().GetProperties()
                 .Where(p => p.PropertyType.IsGenericType && p.GetCustomAttributes(typeof(DatasetAttribute), false).Any())
-                .OrderBy(p => (p.GetCustomAttributes(typeof(DatasetAttribute), false)[0] as DatasetAttribute).Order).ToList();
+                .OrderBy(p => ((DatasetAttribute)p.GetCustomAttributes(typeof(DatasetAttribute), false)[0]).Order).ToList();
         }
 
         public IEnumerable<IDbDataParameter> Outputs(IDB db)
         {
-            var list = new List<IDbDataParameter>();
-            var pList = this.GetType().GetProperties().Where(p => !p.PropertyType.IsGenericType && p.GetCustomAttributes(typeof(OutputAttribute), false).Any()).ToList();
+            List<IDbDataParameter> list = new List<IDbDataParameter>();
+            List<PropertyInfo> pList = GetType().GetProperties().Where(p => !p.PropertyType.IsGenericType && p.GetCustomAttributes(typeof(OutputAttribute), false).Any()).ToList();
 
             pList.ForEach(p =>
             {
-                var parameter = db.ToParameter(p.Name, p.GetValue(this, null));
+                IDbDataParameter parameter = db.ToParameter(p.Name, p.GetValue(this, null));
                 parameter.Direction = ParameterDirection.Output;
                 list.Add(parameter);
             });
@@ -62,7 +60,7 @@ namespace Utility.DB
         {
             if (parameter.Direction == ParameterDirection.Output)
             {
-                var p = this.GetType().GetProperty(parameter.ParameterName.TrimStart('@'));
+                PropertyInfo p = GetType().GetProperty(parameter.ParameterName.TrimStart('@'));
 
                 if (p != null && p.CanWrite)
                 {
@@ -73,7 +71,7 @@ namespace Utility.DB
 
         public void SetOutputs(IDataParameterCollection parameters)
         {
-            for (var i = 0; i < parameters.Count; i++)
+            for (int i = 0; i < parameters.Count; i++)
             {
                 SetOutput(parameters[i] as IDbDataParameter);
             }

@@ -1,7 +1,7 @@
 ﻿using System;
+using System.Linq;
 using System.Web;
 using System.Web.Caching;
-using System.Linq;
 
 namespace Utility.Cache
 {
@@ -40,8 +40,8 @@ namespace Utility.Cache
 
         public MultipleFilesCache<T> Init()
         {
-            var cd = new CacheDependency(FilePath);
-            var instance = Generator(FilePath);
+            CacheDependency cd = new CacheDependency(FilePath);
+            T instance = Generator(FilePath);
             HttpRuntime.Cache.Insert(CacheKey, instance, cd);
 
             return this;

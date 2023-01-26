@@ -42,8 +42,8 @@ namespace Utility.Cache
 
         public FileCache<T> Init()
         {
-            var cd = new CacheDependency(FilePath);
-            var instance = Generator(FilePath);
+            CacheDependency cd = new CacheDependency(FilePath);
+            T instance = Generator(FilePath);
             HttpRuntime.Cache.Insert(CacheKey, instance, cd);
 
             return this;

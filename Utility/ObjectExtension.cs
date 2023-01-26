@@ -13,8 +13,8 @@ namespace Utility
         {
             if (obj == null) return null;
 
-            var memoryStream = new MemoryStream();
-            var formatter = new BinaryFormatter();
+            MemoryStream memoryStream = new MemoryStream();
+            BinaryFormatter formatter = new BinaryFormatter();
 
             formatter.Serialize(memoryStream, obj);
             memoryStream.Position = 0;
@@ -25,7 +25,7 @@ namespace Utility
 
         public static bool Is<T>(this object value) where T : struct
         {
-            var str = "";
+            string str = "";
 
             if (value != null && value != DBNull.Value)
             {
@@ -38,19 +38,19 @@ namespace Utility
         #region To Safe Value
         public static T ToSafeValue<T>(this object value, T defaultValue = default(T)) where T : struct
         {
-            var str = "";
+            string str = "";
 
             if (value != null && value != DBNull.Value)
             {
                 str = value.ToString();
             }
 
-            return SafeConversion.To<T>(str, defaultValue);
+            return SafeConversion.To(str, defaultValue);
         }
 
-        public static string ToSafeValue(this object value, string defaultValue = "")  
+        public static string ToSafeValue(this object value, string defaultValue = "")
         {
-            var str = defaultValue;
+            string str = defaultValue;
 
             if (value != null && value != DBNull.Value)
             {
@@ -66,9 +66,9 @@ namespace Utility
     {
         public static bool IsAnonymousType(this Type type)
         {
-            var hasCompilerGeneratedAttribute = type.GetCustomAttributes(typeof(CompilerGeneratedAttribute), false).Count() > 0;
-            var nameContainsAnonymousType = type.FullName.Contains("AnonymousType");
-            var isAnonymousType = hasCompilerGeneratedAttribute && nameContainsAnonymousType;
+            bool hasCompilerGeneratedAttribute = type.GetCustomAttributes(typeof(CompilerGeneratedAttribute), false).Any();
+            bool nameContainsAnonymousType = type.FullName != null && type.FullName.Contains("AnonymousType");
+            bool isAnonymousType = hasCompilerGeneratedAttribute && nameContainsAnonymousType;
 
             return isAnonymousType;
         }

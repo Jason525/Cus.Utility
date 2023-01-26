@@ -1,9 +1,9 @@
 ﻿using System;
 using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
-using System.ComponentModel.DataAnnotations;
 namespace Utility
 {
     public static class SafeConversion
@@ -14,18 +14,18 @@ namespace Utility
         {
             if (enumObj == null)
             {
-                return String.Empty;
+                return string.Empty;
             }
             Type t = enumObj.GetType();
-            var field = t.GetField(enumObj.ToString());
+            FieldInfo field = t.GetField(enumObj.ToString());
             if (field == null)
             {
-                return String.Empty;
+                return string.Empty;
             }
-            var displayAttr = field.GetCustomAttributes(false).FirstOrDefault(a => a is DisplayAttribute) as DisplayAttribute;
+            DisplayAttribute displayAttr = field.GetCustomAttributes(false).FirstOrDefault(a => a is DisplayAttribute) as DisplayAttribute;
             if (displayAttr == null)
             {
-                var displayNameAttr = field.GetCustomAttributes(false).FirstOrDefault(a => a is DisplayNameAttribute) as DisplayNameAttribute;
+                DisplayNameAttribute displayNameAttr = field.GetCustomAttributes(false).FirstOrDefault(a => a is DisplayNameAttribute) as DisplayNameAttribute;
                 return displayNameAttr == null ? "" : displayNameAttr.DisplayName;
             }
             return displayAttr.Name;
@@ -45,9 +45,9 @@ namespace Utility
 
         public static object To(Type type, object value, object defaultValue = null)
         {
-            var isNullable = type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>);
+            bool isNullable = type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>);
 
-            if (type == typeof(String)) return value == null || value == DBNull.Value ? "" : value.ToString(); //type is string
+            if (type == typeof(string)) return value == null || value == DBNull.Value ? "" : value.ToString(); //type is string
             if (!type.IsValueType && !isNullable) return value; //type is calss
             if (defaultValue == null) defaultValue = isNullable ? null : Activator.CreateInstance(type);
 
@@ -57,27 +57,30 @@ namespace Utility
                 {
                     return value;
                 }
-                var realType = isNullable ? Nullable.GetUnderlyingType(type) : type;
-                if (realType.IsEnum)
+                Type realType = isNullable ? Nullable.GetUnderlyingType(type) : type;
+                if (realType != null)
                 {
-                    return Enum.ToObject(realType, value.ToSafeValue().ToInt());
-                }
-                else if (realType == typeof(bool)|| realType == typeof(bool?))
-                {
-                    return value.ToSafeValue().ToAllBoolen();
-                }
-                else
-                {
-                    var tryParse = realType.GetMethod("TryParse",
-                                    BindingFlags.Public | BindingFlags.Static, Type.DefaultBinder,
-                                    new Type[] { typeof(string), realType.MakeByRefType() },
-                                    new ParameterModifier[] { new ParameterModifier(2) });
-                    var parameters = new object[] { value.ToString(), Activator.CreateInstance(realType) };
-                    bool success = (bool)tryParse.Invoke(null, parameters);
-
-                    if (success)
+                    if (realType.IsEnum)
                     {
-                        return parameters[1];
+                        return Enum.ToObject(realType, value.ToSafeValue().ToInt());
+                    }
+                    else if (realType == typeof(bool) || realType == typeof(bool?))
+                    {
+                        return value.ToSafeValue().ToAllBoolen();
+                    }
+                    else
+                    {
+                        MethodInfo tryParse = realType.GetMethod("TryParse",
+                            BindingFlags.Public | BindingFlags.Static, Type.DefaultBinder,
+                            new[] { typeof(string), realType.MakeByRefType() },
+                            new[] { new ParameterModifier(2) });
+                        object[] parameters = new[] { value.ToString(), Activator.CreateInstance(realType) };
+                        bool success = tryParse != null && (bool)tryParse.Invoke(null, parameters);
+
+                        if (success)
+                        {
+                            return parameters[1];
+                        }
                     }
                 }
             }
@@ -96,18 +99,18 @@ namespace Utility
         {
             if (value != null)
             {
-                var tryParse = type.GetMethod("TryParse",
+                MethodInfo tryParse = type.GetMethod("TryParse",
                                 BindingFlags.Public | BindingFlags.Static, Type.DefaultBinder,
-                                new Type[] { typeof(string), type.MakeByRefType() },
-                                new ParameterModifier[] { new ParameterModifier(2) });
-                var parameters = new object[] { value, Activator.CreateInstance(type) };
-                return (bool)tryParse.Invoke(null, parameters);
+                                new[] { typeof(string), type.MakeByRefType() },
+                                new[] { new ParameterModifier(2) });
+                object[] parameters = new[] { value, Activator.CreateInstance(type) };
+                return tryParse != null && (bool)tryParse.Invoke(null, parameters);
             }
 
             return false;
         }
 
-        public static bool IsEmail(String str)
+        public static bool IsEmail(string str)
         {
             if (string.IsNullOrWhiteSpace(str)) return false;
 

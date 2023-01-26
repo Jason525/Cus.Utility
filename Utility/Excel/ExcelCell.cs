@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reflection;
 
 namespace Utility.Excel
 {
@@ -17,19 +18,19 @@ namespace Utility.Excel
         public object GetValue(IExcelRow item)
         {
             object result = "";
-            var p = item.GetType().GetProperty(FieldName);
+            PropertyInfo p = item.GetType().GetProperty(FieldName);
 
             if (p != null)
             {
-                var value = p.GetValue(item, null);
+                object value = p.GetValue(item, null);
 
                 if (value != null)
                 {
-                    var formatter = Formatter;
+                    IValueFormat formatter = Formatter;
 
                     if (item is ExcelRow)
                     {
-                        var specificColumn = (item as ExcelRow).SpecificColumns.Find(c => c.FieldName == FieldName);
+                        ExcelCell specificColumn = (item as ExcelRow).SpecificColumns.Find(c => c.FieldName == FieldName);
 
                         if (specificColumn != null && specificColumn.Formatter != null)
                         {
@@ -43,19 +44,12 @@ namespace Utility.Excel
                     }
                     else
                     {
-                        if (p.PropertyType == typeof(DateTime?) && value!=null)
-                        {
-                            result = value.ToSafeValue().ToDate();
-                        }
-                        else
-                        {
-                            result = value;
-                        }
+                        result = p.PropertyType == typeof(DateTime?) ? value.ToSafeValue().ToDate() : value;
                     }
                 }
             }
 
             return result;
-        } 
+        }
     }
 }

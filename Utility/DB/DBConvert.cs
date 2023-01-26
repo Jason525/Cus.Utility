@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Linq;
 using System.Reflection;
-using System.Text;
 
 namespace Utility.DB
 {
@@ -17,13 +15,13 @@ namespace Utility.DB
 
         public static object ToModel(IDataReader dr, Type target)
         {
-            var model = Activator.CreateInstance(target);
+            object model = Activator.CreateInstance(target);
 
-            for (var i = 0; i < dr.FieldCount; i++)
+            for (int i = 0; i < dr.FieldCount; i++)
             {
-                var name = dr.GetName(i);
-                var value = dr.GetValue(i);
-                var p = target.GetProperty(name, BindingFlags.Public | BindingFlags.IgnoreCase | BindingFlags.Instance);
+                string name = dr.GetName(i);
+                object value = dr.GetValue(i);
+                PropertyInfo p = target.GetProperty(name, BindingFlags.Public | BindingFlags.IgnoreCase | BindingFlags.Instance);
 
                 if (p != null && p.CanWrite)
                 {
@@ -38,8 +36,8 @@ namespace Utility.DB
         #region DataTable / DataRow
         public static List<T> ToModels<T>(DataTable dt) where T : new()
         {
-            var list = new List<T>();
-            
+            List<T> list = new List<T>();
+
             if (dt != null)
             {
                 foreach (DataRow row in dt.Rows)
@@ -53,7 +51,7 @@ namespace Utility.DB
 
         public static T ToModel<T>(DataRow dr) where T : new()
         {
-            var obj = new T();
+            T obj = new T();
 
             UpdateModel(obj, dr);
 
@@ -62,7 +60,7 @@ namespace Utility.DB
 
         public static void UpdateModel<T>(T obj, DataRow dr) where T : new()
         {
-            foreach (var p in typeof(T).GetProperties())
+            foreach (PropertyInfo p in typeof(T).GetProperties())
             {
                 if (p.CanWrite && dr.Table.Columns.Contains(p.Name))
                 {

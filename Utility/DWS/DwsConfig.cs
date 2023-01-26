@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Net;
-using System.Text;
 
 namespace Utility.DWS
 {
@@ -15,8 +12,7 @@ namespace Utility.DWS
 
         public DwsConfig()
         {
-            Revises = new Dictionary<string, object>();
-            Revises.Add("Timeout", 180000);
+            Revises = new Dictionary<string, object> { { "Timeout", 180000 } };
         }
 
         public abstract Stream GetWSDL();

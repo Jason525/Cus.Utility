@@ -1,12 +1,10 @@
 ﻿using OfficeOpenXml;
 using OfficeOpenXml.Style;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Text;
 using Utility.SimpleExcel.Attributes;
 
 namespace Utility.SimpleExcel
@@ -33,7 +31,7 @@ namespace Utility.SimpleExcel
         /// <param name="sheet">The sheet.</param>
         public static void CreateNewExcel(string[] headers, string filename, string sheet)
         {
-            var dir = Path.GetDirectoryName(filename);
+            string dir = Path.GetDirectoryName(filename);
 
             if (File.Exists(filename)) File.Delete(filename);
             if (!Directory.Exists(dir)) Directory.CreateDirectory(dir);//Steve #1041 2014.09.10
@@ -71,7 +69,7 @@ namespace Utility.SimpleExcel
         /// <summary>
         /// Add the excel row.
         /// </summary>
-        /// <param name="cellValues">The cell values.</param>
+        /// <param name="rowList">The rows.</param>
         /// <param name="filename">full path to the XLSX file to create; will append to this</param>
         public static void AddExcelRow(List<ExcelRowModel> rowList, string filename)
         {
@@ -81,19 +79,18 @@ namespace Utility.SimpleExcel
         /// <summary>
         /// Add the excel row.
         /// </summary>
-        /// <param name="cellValues">The cell values.</param>
+        /// <param name="rowList">The rows.</param>
         /// <param name="filename">full path to the XLSX file to create; will append to this</param>
         /// <param name="sheet">The sheet.</param>
         public static void AddExcelRow(List<ExcelRowModel> rowList, string filename, string sheet)
         {
-            int rowIdx = 1;
             FileInfo newFile = new FileInfo(filename);
             using (ExcelPackage xlPackage = new ExcelPackage(newFile))
             {
                 ExcelWorksheet worksheet = xlPackage.Workbook.Worksheets[sheet];
 
-                rowIdx = worksheet.Dimension.End.Row + 1;
-                foreach (var excelRowModel in rowList)
+                int rowIdx = worksheet.Dimension.End.Row + 1;
+                foreach (ExcelRowModel excelRowModel in rowList)
                 {
                     // Find the last row
                     #region insert data
@@ -168,12 +165,12 @@ namespace Utility.SimpleExcel
                 xlPackage.Save();
             }
         }
-        
-        private static void DoUpdateRowValues(ExcelPackage xlPackage ,List<ExcelRowModel> rowList, string filename, string sheet, int startRowIndex)
+
+        private static void DoUpdateRowValues(ExcelPackage xlPackage, List<ExcelRowModel> rowList, string filename, string sheet, int startRowIndex)
         {
             ExcelWorksheet worksheet = xlPackage.Workbook.Worksheets[sheet];
             int rowIdx = startRowIndex;
-            foreach (var excelRowModel in rowList)
+            foreach (ExcelRowModel excelRowModel in rowList)
             {
                 // Find the last row
                 #region insert data
@@ -263,20 +260,19 @@ namespace Utility.SimpleExcel
         /// Inserts the data.
         /// </summary>
         /// <param name="fileName">Name of the file.</param>
-        /// <param name="loanList">The loan list.</param>
+        /// <param name="rowList">The rows.</param>
         /// <param name="sheetName">Name of the sheet.</param>
         public static void InsertData(string fileName, List<ExcelRowModel> rowList, string sheetName)
         {
             if (rowList.Count > 0)
             {
-                var tempList = new List<ExcelRowModel>();
-                foreach (var excelRowModel in rowList)
+                List<ExcelRowModel> tempList = new List<ExcelRowModel>();
+                foreach (ExcelRowModel excelRowModel in rowList)
                 {
                     List<ExcelCellValue> cellValues = new List<ExcelCellValue>();
-                    ExcelCellValue cv = null;
-                    foreach (var cell in excelRowModel.CellModels)
+                    foreach (ExcelCellModel cell in excelRowModel.CellModels)
                     {
-                        cv = new ExcelCellValue
+                        ExcelCellValue cv = new ExcelCellValue
                         {
                             CellValue = cell.CellValue,
                             CellFormat = cell.CellFormat
@@ -296,7 +292,7 @@ namespace Utility.SimpleExcel
 
     public class ExcelCellValue
     {
-        public Object CellValue { get; set; }
+        public object CellValue { get; set; }
         public string CellFormat { get; set; } // use "Text", "Dollar", "DollarWithCents", "Date", "DateTime", "Percent", "PercentWithSign", "Number"
         public const string FORMAT_TEXT = "Text";
         public const string FORMAT_DOLLAR = "Dollar";
@@ -334,19 +330,19 @@ namespace Utility.SimpleExcel
         public static void CreateNewByModels<T>(string fullName, string sheetName, List<T> models)
             where T : class, new()
         {
-            var props = typeof(T).GetProperties();
+            PropertyInfo[] props = typeof(T).GetProperties();
             props = props.OrderBy(p => p.MetadataToken).ToArray();
             List<string> headerList = GetHeaders(props, models);
-            var excelRowList = new List<ExcelRowModel>();
+            List<ExcelRowModel> excelRowList = new List<ExcelRowModel>();
             foreach (T item in models)
             {
                 ExcelRowModel rowModel = new ExcelRowModel();
                 List<ExcelCellModel> cells = new List<ExcelCellModel>();
                 rowModel.CellModels = cells;
                 excelRowList.Add(rowModel);
-                foreach (var prop in props)
+                foreach (PropertyInfo prop in props)
                 {
-                    var excelAttr = prop.GetCustomAttributes(typeof(ExcelInfoAttribute), true).FirstOrDefault() as ExcelInfoAttribute;
+                    ExcelInfoAttribute excelAttr = prop.GetCustomAttributes(typeof(ExcelInfoAttribute), true).FirstOrDefault() as ExcelInfoAttribute;
                     if (excelAttr == null)
                     {
                         continue;
@@ -362,10 +358,10 @@ namespace Utility.SimpleExcel
                         cell.CellFormat = excelAttr.CellFormat;
 
                         object objVal = prop.GetValue(item, null);
-                        string strVal = "";
+                        string strVal;
                         if (prop.PropertyType == typeof(DateTime) || prop.PropertyType == typeof(DateTime?))
                         {
-                            var dateFmtAttr = prop.GetCustomAttributes(typeof(ExcelDateValueAttribute), true).FirstOrDefault() as ExcelDateValueAttribute;
+                            ExcelDateValueAttribute dateFmtAttr = prop.GetCustomAttributes(typeof(ExcelDateValueAttribute), true).FirstOrDefault() as ExcelDateValueAttribute;
                             string fmt = "MM/dd/yyyy";
                             if (dateFmtAttr != null)
                             {
@@ -390,7 +386,7 @@ namespace Utility.SimpleExcel
         private static List<ExcelCellModel> GetDynamicValues(IEnumerable<object> models, object model, ExcelInfoWithMutipleHeaderAttribute a, PropertyInfo prop)
         {
             List<ExcelCellModel> ret = new List<ExcelCellModel>();
-            List<string> headers =a.GetDynamicHeaders(models);
+            List<string> headers = a.GetDynamicHeaders(models);
             IEnumerable<string> values = prop.GetValue(model, null) as IEnumerable<string>;
             if (values == null)
             {
@@ -415,9 +411,9 @@ namespace Utility.SimpleExcel
         public static List<string> GetHeaders(PropertyInfo[] props, IEnumerable<object> models)
         {
             List<string> headerList = new List<string>();
-            foreach (var prop in props)
+            foreach (PropertyInfo prop in props)
             {
-                var excelAttr = prop.GetCustomAttributes(typeof(ExcelInfoAttribute), true).FirstOrDefault() as ExcelInfoAttribute;
+                ExcelInfoAttribute excelAttr = prop.GetCustomAttributes(typeof(ExcelInfoAttribute), true).FirstOrDefault() as ExcelInfoAttribute;
                 if (excelAttr == null)
                 {
                     continue;

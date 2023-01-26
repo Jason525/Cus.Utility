@@ -56,7 +56,7 @@ namespace Utility
         /// </summary>
         public static bool ToAllBoolen(this string txt, params string[] trueString)
         {
-            return ToBool(txt, new string[] { "1", "Y", "YES", "TRUE" }.Concat(trueString).ToArray());
+            return ToBool(txt, new[] { "1", "Y", "YES", "TRUE" }.Concat(trueString).ToArray());
         }
 
         public static bool ToBool(this string txt, params string[] trueString)
@@ -86,7 +86,7 @@ namespace Utility
         /// <returns></returns>
         public static double ToAllDouble(this string txt, double defaultValue = 0)
         {
-            var d = defaultValue;
+            double d = defaultValue;
 
             if (!string.IsNullOrEmpty(txt))
             {

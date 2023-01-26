@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
 using System.Data;
+using System.Linq;
 
 namespace Utility.DB
 {
@@ -47,7 +45,7 @@ namespace Utility.DB
         }
 
         public abstract List<T> QuerySingleColumn<T>(DBQuery query);
-        public virtual List<T> QuerySingleColumn<T>(string text, bool isSql, object parameters = null) 
+        public virtual List<T> QuerySingleColumn<T>(string text, bool isSql, object parameters = null)
         {
             return QuerySingleColumn<T>(new DBQuery { CommandText = text, IsSql = isSql, Inputs = parameters });
         }
@@ -55,7 +53,7 @@ namespace Utility.DB
 
         #region Query Single
         public abstract T Sacle<T>(DBQuery query);
-        public virtual T Sacle<T>(string text, bool isSql, object parameters = null) 
+        public virtual T Sacle<T>(string text, bool isSql, object parameters = null)
         {
             return Sacle<T>(new DBQuery { CommandText = text, IsSql = isSql, Inputs = parameters });
         }
@@ -78,15 +76,15 @@ namespace Utility.DB
         #region Mothods : Common
         public virtual IEnumerable<IDbDataParameter> ToParameters(object paras)
         {
-            var list = new List<IDbDataParameter>();
+            List<IDbDataParameter> list = new List<IDbDataParameter>();
 
             if (paras != null)
             {
-                var pt = paras.GetType();
+                Type pt = paras.GetType();
 
                 if (pt.Name == "ExpandoObject")
                 {
-                    (paras as IDictionary<string, object>).ToList().ForEach(pi =>
+                    (paras as IDictionary<string, object>)?.ToList().ForEach(pi =>
                     {
                         list.Add(Database.ToParameter(pi.Key, pi.Value ?? DBNull.Value));
                     });
